@@ -1,14 +1,18 @@
+#ifndef MATRIX
+#define MATRIX
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
 
 using namespace std;
 
+template<typename T>
 class Matrix
 {
 private:
    unsigned int number_of_rows, number_of_columns;
-   double **matrix;
+   T **matrix;
 
    void Delete(){
       for(unsigned int row = 0; row < number_of_rows; row++)
@@ -16,30 +20,30 @@ private:
       delete[] matrix;
    // cout << "Matrix was deleted" << '\n'; //очистили выдленную память
    }
-   void Create(){ //выделили память под матрицу number_of_rows х number_of_columns
-      matrix = new double* [number_of_rows];
+   //выделить память под матрицу number_of_rows х number_of_columns
+   void Create(){ 
+      matrix = new T* [number_of_rows];
       for(unsigned int row = 0; row < number_of_rows; row++)
-         matrix[row] = new double [number_of_columns];
+         matrix[row] = new T [number_of_columns];
       //cout << "Matrix was declared" << '\n';
    }
-   void Assign(istream& from){ //присваиваем значение из потока
+   //присвоить значение из потока
+   void Assign(istream& from){ 
       for(unsigned int row = 0; row < number_of_rows; row++){
-         for(unsigned int column = 0; column < number_of_columns; column++){
-            // cout << "Element [" << row << "," << column << "]: ";
-            from >> matrix[row][column];
-         }   
+         for(unsigned int column = 0; column < number_of_columns; column++)
+            from >> matrix[row][column];   
       }
       //cout << "Matrix was assigned with values" << '\n';
    }
-   void Assign(double value){ //присваиваем дефолтное значение 
+   //присвоить дефолтное значение
+   void Assign(T value){  
       for(unsigned int row = 0; row < number_of_rows; row++){
-         for(unsigned int column = 0; column < number_of_columns; column++){
-            // cout << "Element [" << row << "," << column << "]: ";
+         for(unsigned int column = 0; column < number_of_columns; column++)
             matrix[row][column] = value;
-         }   
-      }
-      //cout << "Matrix was assigned with values" << '\n';
+      } 
+      //cout << "Matrix was assigned with values" << '\n';  
    }
+      
 
 public:
    // конструктор для задания матрицы из консоли
@@ -53,7 +57,7 @@ public:
       cerr << "ERROR: MATRIX IS EMPTY" << '\n';
    }
    // конструктор для задания матрицы со значением по умолчанию
-   Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_, double default_value){
+   Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_, T default_value){
       number_of_rows = _number_of_rows_;
       number_of_columns = _number_of_columns_;
       Create();
@@ -74,6 +78,7 @@ public:
    bool IsSquare() const{
       return this->number_of_rows == this->number_of_columns;
    }
+   // вывод матрицы в консоль
    void PrintMatrix() const{
       for(unsigned int row = 0; row < number_of_rows; row++){
          for(unsigned int column = 0; column < number_of_columns; column++)
@@ -81,7 +86,8 @@ public:
          cout << '\n';
       }cout << '\n';
    }
-   void Round(unsigned int num = 7){ //округляем до n чисел после запятой
+   // округлить до n чисел после запятой
+   void Round(unsigned int num = 7){ 
       for(unsigned int row = 0; row < number_of_rows; row++){
          for(unsigned int column = 0; column < number_of_columns; column++)
             matrix[row][column] = round(matrix[row][column]*(10^num))/(10^num);
@@ -117,7 +123,7 @@ public:
             this->matrix[row2][column] += this->matrix[row1][column] * num;
       }
    }
-   // вычисляем детерминант
+   // вычислить детерминант
    double Determinant() const{
       if(!(this->IsSquare())){
          cerr << "ERROR: non-square matrix has no determinant" << '\n';
@@ -128,7 +134,7 @@ public:
          result += ( (column % 2 == 0) ? 1 : -1) * this->matrix[0][column] * this->Minor(0, column).Determinant();
       }return result;
    }
-   // вычисляем минор 
+   // вычислить минор 
    Matrix Minor(unsigned int row_current, unsigned int column_current) const{
       Matrix result(this->number_of_rows - 1, this->number_of_columns - 1, 0);
       for(unsigned int row = 0; row < this->number_of_rows; row++){
@@ -139,7 +145,7 @@ public:
             }
       }return result;
    }
-   // транспонируем
+   // транспонировать
    Matrix Transponed() const{
       if(!(this->IsSquare()))
          cerr << "ERROR: Cannot transpone a non-square matrix" << '\n';
@@ -158,7 +164,7 @@ public:
             result.matrix[row][column] = ((row + column) % 2 == 0 ? 1 : -1) * this->Minor(row, column).Determinant();
       }return result;
    }
-   // считаем обратную матрицу
+   // посчитать обратную матрицу
    Matrix Inverse() const{
       if(!(this->IsSquare()))
          cerr << "ERROR: non-square matrix has no inverse matrix" << '\n';
@@ -183,16 +189,17 @@ public:
    Matrix operator ! () const;
 };
 // матрица * матрица
-Matrix Matrix::operator * (const Matrix& other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator * (const Matrix& other) const
 {
-   if(this->number_of_columns != other.number_of_rows){ //A condition for Matrix to be compatible
+   if(this->number_of_columns != other.number_of_rows){ // необходимое условие для перемножения матриц
       cerr << "ERROR: Matrix are not compatible (cannot multiply)" << '\n';
    }else{
-      Matrix result(this->number_of_rows, other.number_of_columns, 0);
+      Matrix result(this->number_of_rows, other.number_of_columns, T());
       for(unsigned int row = 0; row < result.number_of_rows; row++){
          for(unsigned int column = 0; column < result.number_of_columns; column++){
-            double sum = 0;
-            for(int count = 0; count < this->number_of_columns; count++)
+            T sum = T();
+            for(unsigned int count = 0; count < this->number_of_columns; count++)
                sum += this->matrix[row][count] * other.matrix[count][column];
             result.matrix[row][column] = sum;
          }
@@ -200,21 +207,23 @@ Matrix Matrix::operator * (const Matrix& other) const
    }
 }
 // матрица * скаляр
-Matrix Matrix::operator * (double number) const
+template<typename T>
+Matrix<T> Matrix<T>::operator * (double number) const
 {
-   Matrix result(this->number_of_rows, this->number_of_columns, 0);
+   Matrix result(this->number_of_rows, this->number_of_columns, T());
    for(unsigned int row = 0; row < result.number_of_rows; row++){
       for(unsigned int column = 0; column < result.number_of_columns; column++)
          result.matrix[row][column] = this->matrix[row][column] * number;
    }return result;
 }
 // матрица + матрица
-Matrix Matrix::operator + (const Matrix& other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator + (const Matrix<T>& other) const
 {
    if(this->number_of_rows != other.number_of_rows or this->number_of_columns != other.number_of_columns){
       cerr << "ERROR: Matrix are not compatible (cannot add)" << '\n';
    }else{
-      Matrix result(this->number_of_rows, this->number_of_columns, 0);
+      Matrix result(this->number_of_rows, this->number_of_columns, T());
       for(unsigned int row = 0; row < result.number_of_rows; row++){
          for(unsigned int column = 0; column < result.number_of_columns; column++)
          result.matrix[row][column] = this->matrix[row][column] + other.matrix[row][column];
@@ -222,12 +231,13 @@ Matrix Matrix::operator + (const Matrix& other) const
    }
 }
 // матрица - матрица
-Matrix Matrix::operator - (const Matrix& other) const
+template<typename T>
+Matrix<T> Matrix<T>::operator - (const Matrix& other) const
 {
    if(this->number_of_rows != other.number_of_rows or this->number_of_columns != other.number_of_columns){
       cerr << "ERROR: Matrix are not compatible (cannot subtract)" << '\n';
    }else{
-      Matrix result(this->number_of_rows, this->number_of_columns, 0);
+      Matrix result(this->number_of_rows, this->number_of_columns, T());
       for(unsigned int row = 0; row < result.number_of_rows; row++){
          for(unsigned int column = 0; column < result.number_of_columns; column++)
             result.matrix[row][column] = this->matrix[row][column] - other.matrix[row][column];
@@ -235,7 +245,8 @@ Matrix Matrix::operator - (const Matrix& other) const
    }
 }
 // матрица == матрица
-bool Matrix::operator == (const Matrix& other) const
+template<typename T>
+bool Matrix<T>::operator == (const Matrix& other) const
 {
    if(this->number_of_rows == other.number_of_rows and this->number_of_columns == other.number_of_columns){
       for(unsigned int row = 0; row < this->number_of_rows; row++){
@@ -247,14 +258,16 @@ bool Matrix::operator == (const Matrix& other) const
    }return false;
 }
 // матрица != матрица
-bool Matrix::operator != (const Matrix& other) const
+template<typename T>
+bool Matrix<T>::operator != (const Matrix& other) const
 {
    if(*this == other){
       return false;
    }return true;
 }
 // матрица == скаляр
-bool Matrix::operator == (double number) const{
+template<typename T>
+bool Matrix<T>::operator == (double number) const{
    if(!(this->IsSquare()))
       return false;
    else{
@@ -269,7 +282,8 @@ bool Matrix::operator == (double number) const{
    }
 }
 // матрица != скаляр
-bool Matrix::operator != (double number) const{
+template<typename T>
+bool Matrix<T>::operator != (double number) const{
    if(!(this->IsSquare()))
       return true;
    else{
@@ -284,48 +298,22 @@ bool Matrix::operator != (double number) const{
    }
 }
 // поток вывода << матрица
-ostream& operator << (ostream &out, const Matrix& result){
+template<typename T>
+ostream& operator << (ostream &out, const Matrix<T>& result){
+  cout << "1)";
   for(unsigned int row = 0; row < result.number_of_rows; row++){
-         for(unsigned int column = 0; column < result.number_of_columns; column++)
+         for(unsigned int column = 0; column < result.number_of_columns; column++){
+            cout << "1)";
             out << result.matrix[row][column] << ' ';
          out << '\n';
+         }
       }out << '\n';
    return out;
 }
 // !матрица
-Matrix Matrix::operator ! () const{
+template<typename T>
+Matrix<T> Matrix<T>::operator ! () const{
    return this->Inverse();
 }
 
-int main(){
-   
-   // ввод и вывод матриц с консоли
-   
-   // unsigned int number_of_rows, number_of_columns;
-   // cout << "Number of rows (matrix1): "; cin >> number_of_rows; cout << '\n';
-   // cout << "Number of columns (matrix1): "; cin >> number_of_columns; cout << '\n';
-   // Matrix matrix1(number_of_rows, number_of_columns);
-   // cout << "Number of rows (matrix2): "; cin >> number_of_rows; cout << '\n';
-   // cout << "Number of columns (matrix2): "; cin >> number_of_columns; cout << '\n';
-   // Matrix matrix2(number_of_rows, number_of_columns);
-   // matrix1.PrintMatrix(); matrix2.PrintMatrix();
-   // cout << "Сумма: " << matrix1 + matrix2 << '\n';
-   // cout << "Произведение: " << matrix1 * matrix2 << '\n';
-   
-  // ввод и вывод матрицы в файл
-  
-   Matrix matrix1("input.txt");                                   //файл откуда считывается матрица, пример ввода: 3 3 2 5 7 6 3 4 5 -2 -3
-   matrix1.PrintMatrix();
-   Matrix matrix2 = matrix1.Inverse(); 
-   matrix2.PrintMatrix();                                         //вывод матрицы с фиксированной длинной ячейки 
-   //cout << matrix1.Determinant() << '\n';
-   cout << ( (matrix1 * !matrix1 == matrix1 * matrix2) ?  "equation is true" : "equation is false" ) << '\n';
-   Matrix result =  matrix1 * !matrix1 * matrix1.Determinant();   //любое выражение с матрицами
-   result.Round();
-   result.PrintMatrix();
-   ofstream file("output.txt");                                   //файл куда записывается матрица
-   file << result;
-   file.close();
-   
-   return 0;
-} 
+#endif
