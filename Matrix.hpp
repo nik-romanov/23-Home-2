@@ -5,6 +5,9 @@
 #include <fstream>
 #include <cmath>
 
+template<typename T> class Matrix;  // почему без этих двух строчек пре-объявления не работает переопределение <<
+template<typename T> std::ostream& operator << (std::ostream& o, const Matrix<T>& x);
+
 using namespace std;
 
 template<typename T>
@@ -44,7 +47,6 @@ private:
       //cout << "Matrix was assigned with values" << '\n';  
    }
       
-
 public:
    // конструктор для задания матрицы из консоли
    Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_){
@@ -184,7 +186,8 @@ public:
    bool operator == (double) const;
    bool operator != (double) const;
 
-   friend ostream& operator<<(ostream &, const Matrix&);
+   //friend ostream& operator << (ostream &, const Matrix<T>&);
+   friend ostream& operator << <> (ostream &, const Matrix<T>&); // что означает <> и почему верхняя строчка не работает
 
    Matrix operator ! () const;
 };
@@ -300,13 +303,10 @@ bool Matrix<T>::operator != (double number) const{
 // поток вывода << матрица
 template<typename T>
 ostream& operator << (ostream &out, const Matrix<T>& result){
-  cout << "1)";
   for(unsigned int row = 0; row < result.number_of_rows; row++){
-         for(unsigned int column = 0; column < result.number_of_columns; column++){
-            cout << "1)";
+         for(unsigned int column = 0; column < result.number_of_columns; column++)
             out << result.matrix[row][column] << ' ';
          out << '\n';
-         }
       }out << '\n';
    return out;
 }
