@@ -19,49 +19,52 @@ int main(){
   ifstream file("input.txt");      или    cin >> matrix;
   file >> matrix            ;
   */
-
+  
+  /*ЕДЕНИЧНАЯ И НУЛЕВАЯ МАТРИЦЫ*/
   cout << "Identity matrix: \n" << Matrix<int>::identityMatrix(4)
-       << "Zero matrix: \n" << Matrix<int>::zeroMatrix(2, 5) << '\n';
+       << "Zero matrix: \n" << Matrix<int>::zeroMatrix(2, 5);
     
-  // cout << "\n first of all, insert hight and width, then values: \n";
-  // Matrix<double> cmatrix1(cin);       // размер и значения матрицы задаются через консоль (создаем новую матрицу)
+  cout << "\n first of all, insert hight and width (matrix has to be square), then values: \n";
 
-  // cout << "\n insert only values for matrix 3x3 starting with [0.0], [0, 1] ... : \n";
-  // Matrix<double> cmatrix2(3, 3, cin); // только значения матрицы задаются через консоль   (создаем новую матрицу)
+  /*ЗАДАНИЕ МАТРИЦ*/
+  Matrix<double> cmatrix1(cin);       // размер и значения матрицы задаются через консоль (создаем новую матрицу)
+
+  cout << "\n insert only values for matrix 3x3 starting with [0.0], [0, 1] ... : \n";
+  Matrix<double> cmatrix2(3, 3, cin); // только значения матрицы задаются через консоль   (создаем новую матрицу)
   
   ifstream file1("size_and_values.txt");
-  Matrix<double> fmatrix1(file1);       // размер и значения матрицы задаются через консоль  (создаем новую матрицу)
+  Matrix<double> fmatrix1(file1);       // размер и значения матрицы задаются из файла     (создаем новую матрицу)
   file1.close();
 
   ifstream file2("only_values.txt"); 
   Matrix<double> fmatrix2(3, 3, 0);
-  file2 >> fmatrix2;                    // матрица принимает значения из файла               (изменяем имеющуюся матрицу)
-  Matrix<double> fmatrix3(5, 5, file2); // только значения матрицы задаются через консоль    (создаем новую матрицу)
+  file2 >> fmatrix2;                    // матрица принимает значения из файла             (изменяем имеющуюся матрицу)
+  Matrix<double> fmatrix3(5, 5, file2); // только значения матрицы задаются через консоль  (создаем новую матрицу)
   file2.close();
 
-/*ОСНОВНЫЕ ВЫЧИСЛЕНИЯ*/
-Matrix<double> computing1 = fmatrix1 + fmatrix2 ;//-cmatrix2;
-cout << "fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1;
+/*ОСНОВНЫЕ ВЫЧИСЛЕНИЯ*/ 
+Matrix<double> computing1 = fmatrix1 + fmatrix2 -cmatrix2;
+cout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1;
 
-Matrix<double> computing2 = fmatrix1 * fmatrix2 ;//* cmatrix1.Determinant();
-cout << "fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2;
+Matrix<double> computing2 = fmatrix1 * fmatrix2 * cmatrix1.Determinant();
+cout << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2;
 
 Matrix<double> computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
-cout << "fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
+cout << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
 
-cout << "determinant of fmatrix3 and fmatrix3 itself (size: 5x5): \n" << fmatrix3.Determinant() << '\n' << fmatrix3;
+cout << "\n determinant of fmatrix3 (size: 5x5): \n" << setw(5) << fmatrix3.Determinant() << '\n';
+
+cout << "\n USED MATRIXES: \n" << "cmatrix1 \n" << cmatrix1 << "cmatrix2 \n" << cmatrix2
+     << "fmatrix1 \n" << fmatrix1 << "fmatrix2 \n" << fmatrix2 << "fmatrix3 \n" << fmatrix3;
 
 /*ЗАПИСЬ В ФАЙЛ*/
 ofstream fout("output.txt");
 fout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1
-
      << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2
-
      << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3
-
-     << "\n determinant of fmatrix3 and fmatrix3 itself (size: 5x5): \n" << fmatrix3.Determinant() << '\n' << fmatrix3;
+     << "\n determinant of fmatrix3 (size: 5x5): \n" << setw(5) << fmatrix3.Determinant() << '\n'
+     << "\n USED MATRIXES: \n\n" << "cmatrix1 \n" << cmatrix1 << "cmatrix2 \n" << cmatrix2
+     << "fmatrix1 \n" << fmatrix1 << "fmatrix2 \n" << fmatrix2 << "fmatrix3 \n" << fmatrix3;
 fout.close();
-
-return 0;
 
 } 

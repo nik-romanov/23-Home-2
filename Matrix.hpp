@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <stdexcept>
 
 template<typename T> class Matrix;  // почему без этих двух строчек пре-объявления не работает переопределение <<
 template<typename T> std::ostream& operator << (std::ostream&, const Matrix<T>&);
@@ -26,6 +27,8 @@ private:
    }
    //выделить память под матрицу number_of_rows х number_of_columns
    void Create(){ 
+      if (!number_of_rows || !number_of_columns)
+         throw invalid_argument("\n ERROR: Matrix must not have a number of rows/columns equal to zero \n");
       matrix = new T* [number_of_rows];
       for(unsigned int row = 0; row < number_of_rows; row++)
          matrix[row] = new T [number_of_columns];
@@ -51,13 +54,10 @@ private:
 public:
    // конструктор для задания матрицы заданного размера со значениями из консоли/файла
    Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_, istream& in){
-      if(_number_of_rows_ and _number_of_columns_){
       number_of_rows = _number_of_rows_;
       number_of_columns = _number_of_columns_;
       Create();
       Assign(in);
-    }else
-      cerr << "ERROR: MATRIX IS EMPTY" << '\n';
    }
    // конструктор для задания матрицы со значением по умолчанию
    Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_, T default_value){
@@ -97,7 +97,7 @@ public:
    // элементарное преобразование 1
    void elemental_1(unsigned int row1, unsigned int row2){
       if(row1 > this->number_of_rows or row2 >this->number_of_rows)
-         cerr << "ERROR: number of rows is out of range" << '\n';
+         throw invalid_argument("\n ERROR: cannot apply elemental_1 (number of the row is out of range) \n");
       else{
          row1--; row2--;
          for(unsigned int column = 0; column < this->number_of_columns; column++)
@@ -107,7 +107,7 @@ public:
    // элементарное преобразование 2
    void elemental_2(unsigned int row, double num){
       if(row > this->number_of_rows)
-         cerr << "ERROR: number of rows is out of range" << '\n';
+         throw invalid_argument("\n ERROR: cannot apply elemental_2 (number of the row is out of range) \n");
       else{
          row--;
          for(unsigned int column = 0; column < number_of_columns; column++)
@@ -117,7 +117,7 @@ public:
    // элементарное преобразование 3
    void elemental_3(unsigned int row1, unsigned int row2, double num){
       if(row1 > this->number_of_rows or row2 >this->number_of_rows)
-         cerr << "ERROR: number of rows is out of range" << '\n';
+         throw invalid_argument("\n ERROR: cannot apply elemental_3 (number of the row is out of range) \n");
       else{
          row1--;row2--;
          for(unsigned int column = 0; column < this->number_of_columns; column++)
@@ -168,7 +168,7 @@ public:
 #endif
    double Determinant() const{
       if(!(this->IsSquare())){
-         cerr << "ERROR: non-square matrix has no determinant" << '\n';
+         throw invalid_argument("\n ERROR: non-square matrix has no determinant \n");
       }if(this->number_of_columns == 1)
          return this->matrix[0][0];
       T result = T();
@@ -189,15 +189,11 @@ public:
    }
   // транспонировать
    Matrix<T> Transponed() const{
-      if(!(this->IsSquare()))
-         cerr << "ERROR: Cannot transpone a non-square matrix" << '\n';
-      else{
-         Matrix result(this->number_of_rows, this->number_of_columns, 0);
-         for(unsigned int row = 0; row < this->number_of_rows; row++){
-            for(unsigned int column = 0; column < this->number_of_columns; column++)
-               result.matrix[row][column] = this->matrix[column][row];
-         }return result;
-      }
+      Matrix result(this->number_of_rows, this->number_of_columns, 0);
+      for(unsigned int row = 0; row < this->number_of_rows; row++){
+         for(unsigned int column = 0; column < this->number_of_columns; column++)
+            result.matrix[row][column] = this->matrix[column][row];
+      }return result;
    }
    Matrix<T> Linear() const{
       Matrix result(this->number_of_rows, this->number_of_columns, 0);
@@ -209,9 +205,7 @@ public:
    // посчитать обратную матрицу
    Matrix Inverse() const{
       if(!(this->IsSquare()) || !(this->Determinant()))
-         cerr << "ERROR: non-square or singular matrix has no inverse matrix" << '\n';
-      // elif(!(this->Determinant())){
-      //    cerr << "ERROR: singular matrix has no inverse matrix" << '\n';
+         throw invalid_argument("\n ERROR: non-square or singular matrix has no inverse matrix \n");
       else
          return ( this->Linear().Transponed() * (1 / this->Determinant()) );
    }
@@ -241,9 +235,8 @@ public:
    bool operator != (double) const;
    Matrix<T>& operator = (const Matrix<T> &);
 
-   // template <typename K>
    // friend ostream& operator << (ostream &, const Matrix<T>&);
-   friend ostream& operator << <> (ostream &, const Matrix<T>&); // что означает <> и почему верхняя строчка не работает
+   friend ostream& operator << <> (ostream &, const Matrix<T>&); // что означает <> и почему просто верхняя строчка не работает
    friend istream& operator >> <> (istream &, Matrix<T>&);
 
    Matrix operator ! () const;
@@ -254,7 +247,7 @@ template<typename T>
 Matrix<T> Matrix<T>::operator * (const Matrix& other) const
 {
    if(this->number_of_columns != other.number_of_rows){ // необходимое условие для перемножения матриц
-      cerr << "ERROR: Matrix are not compatible (cannot multiply)" << '\n';
+      throw invalid_argument("\n ERROR: Matrix are not compatible (cannot multiply) \n");
    }else{
       Matrix result(this->number_of_rows, other.number_of_columns, T());
       for(unsigned int row = 0; row < result.number_of_rows; row++){
@@ -282,7 +275,7 @@ template<typename T>
 Matrix<T> Matrix<T>::operator + (const Matrix<T>& other) const
 {
    if(this->number_of_rows != other.number_of_rows or this->number_of_columns != other.number_of_columns){
-      cerr << "ERROR: Matrix are not compatible (cannot add)" << '\n';
+      throw invalid_argument("\n ERROR: Matrix are not compatible (cannot add) \n");
    }else{
       Matrix result(this->number_of_rows, this->number_of_columns, T());
       for(unsigned int row = 0; row < result.number_of_rows; row++){
@@ -296,7 +289,7 @@ template<typename T>
 Matrix<T> Matrix<T>::operator - (const Matrix& other) const
 {
    if(this->number_of_rows != other.number_of_rows or this->number_of_columns != other.number_of_columns){
-      cerr << "ERROR: Matrix are not compatible (cannot subtract)" << '\n';
+      throw invalid_argument("\n ERROR: Matrix are not compatible (cannot subtract) \n");
    }else{
       Matrix result(this->number_of_rows, this->number_of_columns, T());
       for(unsigned int row = 0; row < result.number_of_rows; row++){
@@ -370,7 +363,7 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T> &other)
             this->matrix[row][column] = other.matrix[row][column];
       }return *this;
    }else{
-      cerr << "ERROR: Matrix are not compatible (cannot assign) \n";
+      throw invalid_argument("\n ERROR: Matrix are not compatible (cannot assign) \n");
    }
 
 } 
@@ -379,8 +372,7 @@ template<typename T>
 ostream& operator << (ostream &out, const Matrix<T>& result){
   for(unsigned int row = 0; row < result.number_of_rows; row++){
       for(unsigned int column = 0; column < result.number_of_columns; column++)
-         //out << setw(7) << setprecision(5) << result.matrix[row][column] << ' ';
-         out << result.matrix[row][column] << ' ';
+         out << setw(5) << setprecision(3) << result.matrix[row][column] << ' ';
       out << '\n';
    }out << '\n';
    return out;
@@ -396,8 +388,5 @@ template<typename T>
 Matrix<T> Matrix<T>::operator ! () const{
    return this->Inverse();
 }
-
-// template<typename T> 
-// Matrix<short> Matrix<T>::identityMatrix(unsigned int num){
 
 #endif
