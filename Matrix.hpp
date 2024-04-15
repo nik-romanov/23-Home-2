@@ -6,7 +6,8 @@
 #include <cmath>
 
 template<typename T> class Matrix;  // почему без этих двух строчек пре-объявления не работает переопределение <<
-template<typename T> std::ostream& operator << (std::ostream& o, const Matrix<T>& x);
+template<typename T> std::ostream& operator << (std::ostream&, const Matrix<T>&);
+template<typename T> std::istream& operator >> (std::istream&, Matrix<T>&);
 
 using namespace std;
 
@@ -48,13 +49,13 @@ private:
    }
       
 public:
-   // конструктор для задания матрицы из консоли
-   Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_){
+   // конструктор для задания матрицы заданного размера со значениями из консоли/файла
+   Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_, istream& in){
       if(_number_of_rows_ and _number_of_columns_){
       number_of_rows = _number_of_rows_;
       number_of_columns = _number_of_columns_;
       Create();
-      Assign(cin);
+      Assign(in);
     }else
       cerr << "ERROR: MATRIX IS EMPTY" << '\n';
    }
@@ -65,13 +66,11 @@ public:
       Create();
       Assign(default_value);
    }
-   // конструктор для задания матрицы из файла
-   Matrix(const char *path_to_file){
-      ifstream file(path_to_file);
-      file >> number_of_rows >> number_of_columns;
+   // конструктор для задания матрицы из консоли файла
+   Matrix(istream& in){
+      in >> number_of_rows >> number_of_columns;
       Create();
-      Assign(file);
-      file.close();
+      Assign(in);
    }
    // деструктор
    ~Matrix(){
@@ -126,18 +125,59 @@ public:
       }
    }
    // вычислить детерминант
+#if 0
+      double Determinant(){
+      double sum = 0;
+      if (this->IsSquare()){
+         if (number_of_rows == 1){
+            return matrix[0][0];
+         }else if (number_of_rows == 2){
+            return matrix[0][0] * matrix[1][1] - matrix[1][0] * matrix[0][1];
+         }else {
+            for (unsigned int column = 0; column < number_of_columns; column++){
+               sum += (column % 2 == 0 ? 1 : -1) * matrix[0][column] * Minor(0, column).Determinant();
+            }
+         }
+      } else {
+         cerr << "ERROR: non-square matrix has no determinant" << '\n';
+      }return sum;
+   }
+   void Twodify(const double *a){
+      unsigned int count = 0;
+      for (unsigned int i = 0; i < number_of_rows; ++i){
+         for (unsigned int j = 0; j < number_of_columns; ++j){
+            matrix[i][j] = a[count];
+            count += 1;
+         }
+      }
+   }
+   Matrix<T> Minor(unsigned int row_current, unsigned int column_current){
+      unsigned int count = 0;
+      Matrix<T> result(number_of_rows - 1, number_of_columns - 1, 0);
+      double data[result.number_of_rows * result.number_of_columns];
+      for (unsigned int i = 0; i <= result.number_of_rows; ++i){
+         for (unsigned int j = 0; j <= result.number_of_columns; ++j){
+            if (i != row_current && j != column_current){
+               data[count] = matrix[i][j];
+               count += 1;
+            }
+         }
+      }result.Twodify(data);
+      return result;
+   }
+#endif
    double Determinant() const{
       if(!(this->IsSquare())){
          cerr << "ERROR: non-square matrix has no determinant" << '\n';
       }if(this->number_of_columns == 1)
          return this->matrix[0][0];
-      double result = 0;
+      T result = T();
       for(unsigned int column = 0; column < this->number_of_columns; column++){
          result += ( (column % 2 == 0) ? 1 : -1) * this->matrix[0][column] * this->Minor(0, column).Determinant();
       }return result;
    }
    // вычислить минор 
-   Matrix Minor(unsigned int row_current, unsigned int column_current) const{
+   Matrix<T> Minor(unsigned int row_current, unsigned int column_current) const{
       Matrix result(this->number_of_rows - 1, this->number_of_columns - 1, 0);
       for(unsigned int row = 0; row < this->number_of_rows; row++){
             if(row == row_current) continue;
@@ -147,8 +187,8 @@ public:
             }
       }return result;
    }
-   // транспонировать
-   Matrix Transponed() const{
+  // транспонировать
+   Matrix<T> Transponed() const{
       if(!(this->IsSquare()))
          cerr << "ERROR: Cannot transpone a non-square matrix" << '\n';
       else{
@@ -159,7 +199,7 @@ public:
          }return result;
       }
    }
-   Matrix Linear() const{
+   Matrix<T> Linear() const{
       Matrix result(this->number_of_rows, this->number_of_columns, 0);
       for(unsigned int row = 0; row < this->number_of_rows; row++){
          for(unsigned int column = 0; column < this->number_of_columns; column++)
@@ -168,11 +208,25 @@ public:
    }
    // посчитать обратную матрицу
    Matrix Inverse() const{
-      if(!(this->IsSquare()))
-         cerr << "ERROR: non-square matrix has no inverse matrix" << '\n';
-      else{
+      if(!(this->IsSquare()) || !(this->Determinant()))
+         cerr << "ERROR: non-square or singular matrix has no inverse matrix" << '\n';
+      // elif(!(this->Determinant())){
+      //    cerr << "ERROR: singular matrix has no inverse matrix" << '\n';
+      else
          return ( this->Linear().Transponed() * (1 / this->Determinant()) );
-      }
+   }
+   // создать еденичную матрицу заданного размера
+   static Matrix<T> identityMatrix(unsigned int num){
+      Matrix<T> result(num, num, 0);
+      for(unsigned int row = 0; row < num; row++){
+            for(unsigned int column = 0; column < num; column++)
+               result.matrix[row][column] = (row == column ? 1 : 0);
+      }return result;
+   }
+   // создать нулевую матрицу заданного размера
+   static Matrix<T> zeroMatrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_){
+      Matrix<T> result(_number_of_rows_, _number_of_columns_, 0);
+      return result;
    }
 
    Matrix operator * (const Matrix&) const;
@@ -185,11 +239,15 @@ public:
    bool operator != (const Matrix&) const;
    bool operator == (double) const;
    bool operator != (double) const;
+   Matrix<T>& operator = (const Matrix<T> &);
 
-   //friend ostream& operator << (ostream &, const Matrix<T>&);
+   // template <typename K>
+   // friend ostream& operator << (ostream &, const Matrix<T>&);
    friend ostream& operator << <> (ostream &, const Matrix<T>&); // что означает <> и почему верхняя строчка не работает
+   friend istream& operator >> <> (istream &, Matrix<T>&);
 
    Matrix operator ! () const;
+
 };
 // матрица * матрица
 template<typename T>
@@ -270,7 +328,8 @@ bool Matrix<T>::operator != (const Matrix& other) const
 }
 // матрица == скаляр
 template<typename T>
-bool Matrix<T>::operator == (double number) const{
+bool Matrix<T>::operator == (double number) const
+{
    if(!(this->IsSquare()))
       return false;
    else{
@@ -286,7 +345,8 @@ bool Matrix<T>::operator == (double number) const{
 }
 // матрица != скаляр
 template<typename T>
-bool Matrix<T>::operator != (double number) const{
+bool Matrix<T>::operator != (double number) const
+{
    if(!(this->IsSquare()))
       return true;
    else{
@@ -300,20 +360,44 @@ bool Matrix<T>::operator != (double number) const{
       }return false;
    }
 }
+// матрица = матрица
+template<typename T>
+Matrix<T>& Matrix<T>::operator = (const Matrix<T> &other)
+{
+   if(this->number_of_rows == other.number_of_rows && this->number_of_columns == other.number_of_columns){
+      for(unsigned int row = 0; row < this->number_of_rows; row++){
+         for(unsigned int column = 0; column < this->number_of_columns; column++)
+            this->matrix[row][column] = other.matrix[row][column];
+      }return *this;
+   }else{
+      cerr << "ERROR: Matrix are not compatible (cannot assign) \n";
+   }
+
+} 
 // поток вывода << матрица
 template<typename T>
 ostream& operator << (ostream &out, const Matrix<T>& result){
   for(unsigned int row = 0; row < result.number_of_rows; row++){
-         for(unsigned int column = 0; column < result.number_of_columns; column++)
-            out << result.matrix[row][column] << ' ';
-         out << '\n';
-      }out << '\n';
+      for(unsigned int column = 0; column < result.number_of_columns; column++)
+         //out << setw(7) << setprecision(5) << result.matrix[row][column] << ' ';
+         out << result.matrix[row][column] << ' ';
+      out << '\n';
+   }out << '\n';
    return out;
+}
+// поток ввода >> матрица
+template<typename T>
+istream& operator >> (istream &in, Matrix<T>& result){
+   result.Assign(in);
+   return in;
 }
 // !матрица
 template<typename T>
 Matrix<T> Matrix<T>::operator ! () const{
    return this->Inverse();
 }
+
+// template<typename T> 
+// Matrix<short> Matrix<T>::identityMatrix(unsigned int num){
 
 #endif

@@ -1,4 +1,27 @@
--73 -0 -0 
--0 -73 -0 
--0 -0 -73 
+
+ fmatrix1 + fmatrix2 - cmatrix2: 
+9 9 3 
+7 5 6 
+7 10 12 
+
+
+ fmatrix2 * fmatrix1 * cmatrix1.Determinant(): 
+36 51 66 
+3 6 9 
+29 34 39 
+
+
+ fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): 
+-63 -0 -0 
+-0 -63 -0 
+-0 -0 -63 
+
+
+ determinant of fmatrix3 and fmatrix3 itself (size: 5x5): 
+272
+1 4 7 8 5 
+4 4 4 4 4 
+2 5 4 6 1 
+0 1 0 1 0 
+7 8 9 4 5 
 

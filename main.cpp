@@ -2,40 +2,66 @@
 
 int main(){
    
-   // ввод и вывод матриц с консоли
-   
-   // unsigned int number_of_rows, number_of_columns;
-   // cout << "Number of rows (matrix1): "; cin >> number_of_rows; cout << '\n'
-   //      << "Number of columns (matrix1): "; cin >> number_of_columns; cout << '\n';
-   // Matrix<double> matrix1(number_of_rows, number_of_columns);
-
-   // cout << "Number of rows (matrix2): "; cin >> number_of_rows; cout << '\n'
-   //      << "Number of columns (matrix2): "; cin >> number_of_columns; cout << '\n';
-   // Matrix<double> matrix2(number_of_rows, number_of_columns);
-   
-   // matrix1.PrintMatrix(); matrix2.PrintMatrix();
-
-   // cout << "Сумма: " << matrix1 + matrix2 << '\n'
-   //      << "Произведение: " << matrix1 * matrix2 << '\n';
-   
-  // ввод и вывод матрицы в файл
+  /*
+  ВВОД МАТРИЦЫ ИЗ КОНСОЛИ/ФАЙЛА
+  1.0. для создания матрицы, размер которой указывается в файле/консоли,
+  использовать конструктор матрицы, в который передается поток ввода, пример:
+  ifstream file("input.txt") ;      или    Matrix<double> matrix(cin);  
+  Matrix<double> matrix(file); 
   
-   Matrix<double> matrix1("input.txt");                                 //файл откуда считывается матрица, пример ввода: 3 3 2 5 7 6 3 4 5 -2 -3
-   matrix1.PrintMatrix();
+  1.1. для создания матрицы определенного размера и заполенения ее значениями из файла/консоли,
+  использовать конструктор, принимающий размеры матрицы и поток ввода, пример:
+  ifstream file("input.txt")       ;      или    Matrix<double> matrix(3, 3, cin);
+  Matrix<double> matrix(3, 3, file);
 
-   Matrix<double> matrix2 = matrix1.Inverse(); 
-   matrix2.PrintMatrix();                                               //вывод матрицы с фиксированной длинной ячейки 
+  2.0. для изменения значения значений уже созданной матрицы размера N x M
+  использовать оператор >>, принимающий поток ввода и саму матрицу, пример:
+  ifstream file("input.txt");      или    cin >> matrix;
+  file >> matrix            ;
+  */
 
-   cout << "Детерминант (matrix1): " << matrix1.Determinant() << '\n'
-        << "matrix1 * !matrix1 == matrix1 * matrix2: "
-        << ( (matrix1 * !matrix1 == matrix1 * matrix2) ?  "equation is true" : "equation is false" ) << '\n';
-   Matrix<double> result =  matrix1 * !matrix1 * matrix1.Determinant(); //любое выражение с матрицами
-   result.Round();
+  cout << "Identity matrix: \n" << Matrix<int>::identityMatrix(4)
+       << "Zero matrix: \n" << Matrix<int>::zeroMatrix(2, 5) << '\n';
+    
+  // cout << "\n first of all, insert hight and width, then values: \n";
+  // Matrix<double> cmatrix1(cin);       // размер и значения матрицы задаются через консоль (создаем новую матрицу)
 
-   result.PrintMatrix();
-   ofstream file("output.txt");                                         //файл куда записывается матрица
-   file << result;
-   file.close();
-   
-   return 0;
+  // cout << "\n insert only values for matrix 3x3 starting with [0.0], [0, 1] ... : \n";
+  // Matrix<double> cmatrix2(3, 3, cin); // только значения матрицы задаются через консоль   (создаем новую матрицу)
+  
+  ifstream file1("size_and_values.txt");
+  Matrix<double> fmatrix1(file1);       // размер и значения матрицы задаются через консоль  (создаем новую матрицу)
+  file1.close();
+
+  ifstream file2("only_values.txt"); 
+  Matrix<double> fmatrix2(3, 3, 0);
+  file2 >> fmatrix2;                    // матрица принимает значения из файла               (изменяем имеющуюся матрицу)
+  Matrix<double> fmatrix3(5, 5, file2); // только значения матрицы задаются через консоль    (создаем новую матрицу)
+  file2.close();
+
+/*ОСНОВНЫЕ ВЫЧИСЛЕНИЯ*/
+Matrix<double> computing1 = fmatrix1 + fmatrix2 ;//-cmatrix2;
+cout << "fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1;
+
+Matrix<double> computing2 = fmatrix1 * fmatrix2 ;//* cmatrix1.Determinant();
+cout << "fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2;
+
+Matrix<double> computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
+cout << "fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
+
+cout << "determinant of fmatrix3 and fmatrix3 itself (size: 5x5): \n" << fmatrix3.Determinant() << '\n' << fmatrix3;
+
+/*ЗАПИСЬ В ФАЙЛ*/
+ofstream fout("output.txt");
+fout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1
+
+     << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2
+
+     << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3
+
+     << "\n determinant of fmatrix3 and fmatrix3 itself (size: 5x5): \n" << fmatrix3.Determinant() << '\n' << fmatrix3;
+fout.close();
+
+return 0;
+
 } 
