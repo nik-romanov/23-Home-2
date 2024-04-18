@@ -66,7 +66,7 @@ public:
       Create();
       Assign(default_value);
    }
-   // конструктор для задания матрицы из консоли файла
+   // конструктор для задания матрицы из консоли/файла
    Matrix(istream& in){
       in >> number_of_rows >> number_of_columns;
       Create();
@@ -357,16 +357,19 @@ bool Matrix<T>::operator != (double number) const
 template<typename T>
 Matrix<T>& Matrix<T>::operator = (const Matrix<T> &other)
 {
-   if(this->number_of_rows == other.number_of_rows && this->number_of_columns == other.number_of_columns){
-      for(unsigned int row = 0; row < this->number_of_rows; row++){
-         for(unsigned int column = 0; column < this->number_of_columns; column++)
-            this->matrix[row][column] = other.matrix[row][column];
-      }return *this;
-   }else{
-      throw invalid_argument("\n ERROR: Matrix are not compatible (cannot assign) \n");
-   }
+   if (this == &other)
+      return *this;
 
-} 
+   this->Delete();
+   this->number_of_rows = other.number_of_rows; 
+   this->number_of_columns = other.number_of_columns;
+   this->Create();
+
+   for(unsigned int row = 0; row < this->number_of_rows; row++){
+      for(unsigned int column = 0; column < this->number_of_columns; column++)
+         this->matrix[row][column] = other.matrix[row][column];
+   }return *this;
+}
 // поток вывода << матрица
 template<typename T>
 ostream& operator << (ostream &out, const Matrix<T>& result){

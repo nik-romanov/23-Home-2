@@ -43,28 +43,29 @@ int main(){
   file2.close();
 
 /*ОСНОВНЫЕ ВЫЧИСЛЕНИЯ*/ 
-Matrix<double> computing1 = fmatrix1 + fmatrix2 -cmatrix2;
-cout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1;
+  Matrix<double> computing1 = fmatrix1 + fmatrix2 -cmatrix2;
+  cout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1;
 
-Matrix<double> computing2 = fmatrix1 * fmatrix2 * cmatrix1.Determinant();
-cout << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2;
+  Matrix<double> computing2 = fmatrix1 * fmatrix2 * cmatrix1.Determinant();
+  cout << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2;
 
-Matrix<double> computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
-cout << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
+  Matrix<double> computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
+  cout << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
 
-cout << "\n determinant of fmatrix3 (size: 5x5): \n" << setw(5) << fmatrix3.Determinant() << '\n';
+  cout << "\n determinant of fmatrix3 (size: 5x5): \n" << setw(5) << fmatrix3.Determinant() << '\n';
 
-cout << "\n USED MATRIXES: \n" << "cmatrix1 \n" << cmatrix1 << "cmatrix2 \n" << cmatrix2
+  cout << "\n USED MATRIXES: \n" << "cmatrix1 \n" << cmatrix1 << "cmatrix2 \n" << cmatrix2
      << "fmatrix1 \n" << fmatrix1 << "fmatrix2 \n" << fmatrix2 << "fmatrix3 \n" << fmatrix3;
 
 /*ЗАПИСЬ В ФАЙЛ*/
-ofstream fout("output.txt");
-fout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1
+  ofstream fout("output.txt");
+  fout << "\n fmatrix1 + fmatrix2 - cmatrix2: \n" << computing1
      << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2
      << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3
      << "\n determinant of fmatrix3 (size: 5x5): \n" << setw(5) << fmatrix3.Determinant() << '\n'
      << "\n USED MATRIXES: \n\n" << "cmatrix1 \n" << cmatrix1 << "cmatrix2 \n" << cmatrix2
      << "fmatrix1 \n" << fmatrix1 << "fmatrix2 \n" << fmatrix2 << "fmatrix3 \n" << fmatrix3;
-fout.close();
+  fout.close();
 
+  return 0;
 } 
