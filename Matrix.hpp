@@ -52,6 +52,8 @@ private:
    }
       
 public:
+   //конструктор по умолчанию
+   Matrix() : matrix(nullptr), number_of_rows(0), number_of_columns(0) {}
    // конструктор для задания матрицы заданного размера со значениями из консоли/файла
    Matrix(unsigned int _number_of_rows_, unsigned int _number_of_columns_, istream& in){
       number_of_rows = _number_of_rows_;
@@ -124,7 +126,6 @@ public:
             this->matrix[row2][column] += this->matrix[row1][column] * num;
       }
    }
-   // вычислить детерминант
 #if 0
       double Determinant(){
       double sum = 0;
@@ -166,6 +167,7 @@ public:
       return result;
    }
 #endif
+   // вычислить детерминант
    double Determinant() const{
       if(!(this->IsSquare())){
          throw invalid_argument("\n ERROR: non-square matrix has no determinant \n");
@@ -359,8 +361,9 @@ Matrix<T>& Matrix<T>::operator = (const Matrix<T> &other)
 {
    if (this == &other)
       return *this;
+   if (this->matrix != nullptr)
+      this->Delete();
 
-   this->Delete();
    this->number_of_rows = other.number_of_rows; 
    this->number_of_columns = other.number_of_columns;
    this->Create();

@@ -23,10 +23,9 @@ int main(){
   /*ЕДЕНИЧНАЯ И НУЛЕВАЯ МАТРИЦЫ*/
   cout << "Identity matrix: \n" << Matrix<int>::identityMatrix(4)
        << "Zero matrix: \n" << Matrix<int>::zeroMatrix(2, 5);
-    
-  cout << "\n first of all, insert hight and width (matrix has to be square), then values: \n";
 
   /*ЗАДАНИЕ МАТРИЦ*/
+  cout << "\n first of all, insert hight and width (matrix has to be square), then values: \n";
   Matrix<double> cmatrix1(cin);       // размер и значения матрицы задаются через консоль (создаем новую матрицу)
 
   cout << "\n insert only values for matrix 3x3 starting with [0.0], [0, 1] ... : \n";
@@ -49,8 +48,21 @@ int main(){
   Matrix<double> computing2 = fmatrix1 * fmatrix2 * cmatrix1.Determinant();
   cout << "\n fmatrix2 * fmatrix1 * cmatrix1.Determinant(): \n" << computing2;
 
-  Matrix<double> computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
-  cout << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
+  // обработка случая когда fmatrix1 вырожденная => не имеет обратной (fmatrix1 задается из файла size_and_values.txt)
+  Matrix<double> computing3;
+  try {
+    computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
+    cout << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
+  } catch (invalid_argument error) {
+    do {
+    cout << error.what() << "\n fmatrix1: \n" << fmatrix1
+         << "re-initialize fmatrix1 so it will have an enverse matrix (fmatrix1.Determinant() should NOT equal 0) \n"
+         << "enter values for matrix 3x3: \n";
+    cin >> fmatrix1;
+    } while (!fmatrix1.Determinant());
+    computing3 = fmatrix1 * !fmatrix1 * fmatrix1.Determinant();
+    cout << "\n fmatrix1 * !fmatrix1 * fmatrix1.Determinant(): \n" << computing3;
+  }
 
   cout << "\n determinant of fmatrix3 (size: 5x5): \n" << setw(5) << fmatrix3.Determinant() << '\n';
 
